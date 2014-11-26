@@ -240,13 +240,16 @@ public simplet(){
         
         List<List<EstimateResult>> results = cl.classify(Arrays.asList(testData));
         for (List<EstimateResult> result : results) {
+            //EstimateResult hsg;
             for (EstimateResult r : result) {
-                System.out.println(r.score);
+                System.out.println(r.label);
                 System.out.println("OK");
                 fds=r.score;
+                //r.label
             }
             //System.out.println(cl.getConfig());
-            System.out.println(fds);
+            //String[] ls=(String[]) results.toArray();
+            System.out.println(results);
         }
        //}
        //catch(Exception eklkj){System.out.println("Skatoulaasd");}
