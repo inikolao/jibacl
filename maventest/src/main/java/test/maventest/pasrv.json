@@ -6,11 +6,12 @@
     "num_filter_rules" : [],
     "string_types" : {},
     "string_rules" : [
-      { "key" : "*", "type" : "str", "sample_weight" : "bin", "global_weight" : "bin" }
+      
     ],
     "num_types" : {},
     "num_rules" : [
-      { "key" : "*", "type" : "num" }
+      { "key" : "reading", "type" : "log" }
+      
     ]
   },
   "method" : "PA"

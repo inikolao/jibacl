@@ -16,20 +16,18 @@ import us.jubat.classifier.EstimateResult;
 import us.jubat.classifier.LabeledDatum;
 import us.jubat.common.Datum;
 
-
-
 /**
  *
  * @author root
  */
-public class simplet {
-//String hst= new String();
-//int prt=0;    
-public simplet(){
-
-
-}
-    public void createTrainFile() throws Exception
+public class simplet3 {
+    private static Datum makeDatum(String key,double value) {
+        return new Datum().addNumber(key, value);
+    }
+    private static LabeledDatum makeTrainDatum(String label, String key, double value) {
+        return new LabeledDatum(label, makeDatum(key,value));
+    }
+    public static void createTrainFile() throws Exception
     {
         //text manipulation
         PrintWriter writer = new PrintWriter("trainfs.dat", "UTF-8");
@@ -54,7 +52,7 @@ public simplet(){
         lne=lne.replaceAll("\"readings\"\\:\\[|\\]", "");
         lne = lne.replaceFirst("\\{","");
         lne = lne.replaceFirst(",\"capabili.*","");
-        System.out.println(lne);
+        //System.out.println(lne);
         //System.out.println(split[0]);
         String type="";
         String[] split1 = lne.split(",\\{");
@@ -90,7 +88,7 @@ public simplet(){
         
         
     }
-    public void createClassfFile() throws Exception
+    public static void createClassfFile() throws Exception
     {
         //text manipulation
         PrintWriter writer = new PrintWriter("classfs.dat", "UTF-8");
@@ -115,7 +113,7 @@ public simplet(){
         lne=lne.replaceAll("\"readings\"\\:\\[|\\]", "");
         lne = lne.replaceFirst("\\{","");
         lne = lne.replaceFirst(",\"capabili.*","");
-        System.out.println(lne);
+        //System.out.println(lne);
         //System.out.println(split[0]);
         String type="";
         String[] split1 = lne.split(",\\{");
@@ -151,57 +149,45 @@ public simplet(){
         
         
     }
-    public void client(String hst,int prt) throws UnknownHostException, FileNotFoundException, IOException
-    {
-         String host = "192.168.2.8";
+    public simplet3(){}
+    public static void main(String[] args) throws Exception {
+        createTrainFile();
+        createClassfFile();
+        String host = "192.168.2.8";
         int port = 9199;
         String name = "test";
-        ClassifierClient cl=new ClassifierClient(host,port,name,10);    
-        //try{
-        
-        //String lne =dr.readLine();
-        String lne= null;
+        int k=1;
+        ClassifierClient client = new ClassifierClient(host, port, name, 10);
+
+        List<LabeledDatum> trainData;
+        trainData = new ArrayList();
+        FileReader frdc =new FileReader("train.dat");
+        BufferedReader drc =new BufferedReader(frdc);
+        String lne;
         String[] elem;
         String[] elemval1 = null;
         String[] elemval2 = null;
-        int sz;
-        //datum creation
-        Datum dt = null;
-        //DATUM format-> NodID ? ,Type ? ,Timestamp ? ,reading ? ,StringReading ?
-        LabeledDatum d = null;
-        LabeledDatum[] fd = null;
-        System.out.println("datum create");
-        int k=0;
-        FileReader frdc =new FileReader("train.dat");
-        BufferedReader drc =new BufferedReader(frdc);
         while ((lne = drc.readLine()) != null) {
         //lne = drc.readLine();
-        System.out.println(lne);
         elem=lne.split(",");
-        System.out.println(elem[0]);
-        sz=elem.length;//need Tuples einai kalyetra.....        
+        //System.out.println(elem[0]);
         elemval1=elem[1].split(":");
         elemval2=elem[3].split(":");
-        System.out.println(elemval1 [0].replaceAll("\"", ""));
-        System.out.println(Integer.parseInt(elemval2 [1]));
+        
         //elemval[1] [0].replaceAll("\"", ""), elemval[1] [1].replaceAll("\"", "")
         //System.out.println(k);
-        fd[k] =new LabeledDatum(elemval1 [1],new Datum().addNumber(elemval2 [0].replaceAll("\"", ""), Integer.parseInt(elemval2 [1])));
-        k++;
-        System.out.println("k1");
-        System.out.println(k);
-        
+        trainData.add(makeTrainDatum(elemval1 [1],elemval2 [0].replaceAll("\"", ""), Double.parseDouble(elemval2 [1])));
+        //k++;
         }
-        
         drc.close();
         frdc.close();
-        cl.train(Arrays.asList(fd));
-        //}
-        //catch(Exception exv){System.out.println("Skatoules21");}
+        client.train(trainData);
 
-        System.out.println(cl.getStatus());
-        //String lne =dr.readLine();
-        String lne2= null;
+        //Datum[] testData = { //
+        //makeDatum("reading", 25),
+        //        makeDatum("reading", 0), };
+         List<Datum> testData= new ArrayList();
+         String lne2= null;
         String[] elem2;
         String[] elemval21 = null;
         String[] elemval22 = null;
@@ -222,57 +208,19 @@ public simplet(){
         //elemval[1] [0].replaceAll("\"", ""), elemval[1] [1].replaceAll("\"", "")
         //System.out.println(elemval21 [0].replaceAll("\"", ""));
         //System.out.println(Integer.parseInt(elemval22 [1]));
-//exei problhma h grammh?        
-        //tesst [k2]=
-        //Datum hg=new Datum().addNumber(elemval22 [0].replaceAll("\"", ""), Integer.parseInt(elemval22 [1]));
-        //tesst [k2]=hg;
-        k2++;
-        //System.out.println(k2);
+        testData.add(makeDatum(elemval22 [0].replaceAll("\"", ""), Double.parseDouble(elemval22 [1])));
         }
         drc2.close();
         frdc2.close();
-        //System.out.println("clyfi FUCK YOU");
-        Datum hg=new Datum().addNumber("cur", 25);
-        Datum[] testData = {hg,hg,hg};
-       //cl.classify(Arrays.asList(testData));
-        //try{
-        double fds = 0;
-        
-        List<List<EstimateResult>> results = cl.classify(Arrays.asList(testData));
+        List<List<EstimateResult>> results = client.classify(testData);
+
         for (List<EstimateResult> result : results) {
-            //EstimateResult hsg;
             for (EstimateResult r : result) {
-               System.out.printf("%s %f\n", r.label, r.score);
-                //r.label
+                System.out.printf("%s %f\n", r.label, r.score);
             }
-            //System.out.println(cl.getConfig());
-            //String[] ls=(String[]) results.toArray();
-            System.out.println(results);
-        }
-       //}
-       //catch(Exception eklkj){System.out.println("Skatoulaasd");}
-    }
-    
-    
-    public static void main(String[] args)
-    {
-        simplet sm= new simplet();
-        
-        try{
-            sm.createTrainFile();
-            sm.createClassfFile();
-            sm.client("192.168.2.8", 9199);
-            System.exit(0);
-        }
-        catch(Exception ex)
-        {
-        //System.out.println("yparxei thema");
+            System.out.println();
         }
 
+        System.exit(0);
     }
 }
-/*
-PrintWriter wr = new PrintWriter("test.dat", "UTF-8");
-        wr.println(split3[0]);
-        wr.close();
-*/

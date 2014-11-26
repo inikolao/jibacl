@@ -17,7 +17,6 @@
     <url>http://download.jubat.us/maven</url>
   </repository>
 </repositories>
-
 <dependencies>
   <dependency>
     <groupId>us.jubat</groupId>
@@ -25,6 +24,8 @@
     <version>[0.6,)</version>
   </dependency>
 </dependencies>
+
+
 </project>
 
 <plugin>
